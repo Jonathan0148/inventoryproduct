@@ -18,7 +18,6 @@ public class ApiKeyFilter implements Filter {
     @Autowired
     private ApiKeyRegistry apiKeyRegistry;
 
-    // Lista de rutas que NO requieren autenticación
     private static final List<String> WHITELIST = List.of(
             "/swagger-ui.html",
             "/swagger-ui/",
@@ -35,7 +34,6 @@ public class ApiKeyFilter implements Filter {
         HttpServletRequest httpReq = (HttpServletRequest) request;
         String path = httpReq.getRequestURI();
 
-        // ✅ Ignorar rutas públicas (Swagger)
         if (WHITELIST.stream().anyMatch(path::startsWith)) {
             chain.doFilter(request, response);
             return;

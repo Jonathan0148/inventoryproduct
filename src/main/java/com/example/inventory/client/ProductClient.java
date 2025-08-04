@@ -25,7 +25,7 @@ public class ProductClient {
 
     public ProductDTO getProductById(Long productId) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("x-api-key", apiKey); // 👈 Incluye la API Key si es requerida
+        headers.set("x-api-key", apiKey);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
         ResponseEntity<ApiResponse<ProductDTO>> response = restTemplate.exchange(

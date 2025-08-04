@@ -6,16 +6,10 @@ import com.example.inventory.exception.InsufficientStockException;
 import com.example.inventory.exception.ResourceNotFoundException;
 import com.example.inventory.model.Inventory;
 import com.example.inventory.repository.InventoryRepository;
-import com.example.inventory.util.SuccessResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
-
-import java.util.Optional;
 
 @Service
 public class InventoryService {
@@ -82,7 +76,6 @@ public class InventoryService {
         Long productId = request.getProductId();
         int requestedQuantity = request.getQuantity();
 
-        // 1. Verificar existencia del producto en MS1
         ProductDTO product;
         try {
             product = productClient.getProductById(productId);
@@ -92,21 +85,17 @@ public class InventoryService {
             throw new RuntimeException("Error al consultar el producto en el MS1: " + e.getMessage());
         }
 
-        // 2. Consultar inventario
         Inventory inventory = inventoryRepository.findByProductId(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventario no encontrado para el producto ID: " + productId));
 
-        // 3. Verificar disponibilidad
         if (inventory.getQuantity() < requestedQuantity) {
             throw new InsufficientStockException("Inventario insuficiente para el producto ID: " + productId);
         }
 
-        // 4. Actualizar inventario
         int remaining = inventory.getQuantity() - requestedQuantity;
         inventory.setQuantity(remaining);
         inventoryRepository.save(inventory);
 
-        // 5. Retornar información de la compra
         PurchaseResponse response = new PurchaseResponse();
         response.setProductId(product.getId());
         response.setProductName(product.getName());
