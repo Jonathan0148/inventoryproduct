@@ -49,7 +49,6 @@ public class InventoryIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Clean and prepare
         inventoryRepository.deleteAll();
 
         product = new ProductDTO();
@@ -58,7 +57,6 @@ public class InventoryIntegrationTest {
         product.setDescription("Descripción Mock");
         product.setPrice(BigDecimal.valueOf(50.0));
 
-        // Mock for existing and non-existing products
         when(productClient.getProductById(1L)).thenReturn(product);
         when(productClient.getProductById(999L))
                 .thenThrow(new com.example.inventory.exception.ResourceNotFoundException(
