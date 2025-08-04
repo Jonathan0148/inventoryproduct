@@ -14,13 +14,24 @@ public class ApiResponse<T> {
     @Schema(description = "Código de estado HTTP de la respuesta", example = "200")
     private int status;
 
-    // ✅ Constructor vacío necesario para deserialización
     public ApiResponse() {
     }
 
     public ApiResponse(String message, T data, int status) {
         this.message = message;
         this.data = data;
+        this.status = status;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public void setStatus(int status) {
         this.status = status;
     }
 

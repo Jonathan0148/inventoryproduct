@@ -5,7 +5,11 @@ import com.example.inventory.dto.ProductDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -23,6 +27,11 @@ public class ProductClient {
         this.apiKey = apiKey;
     }
 
+    @Retryable(
+            value = { RestClientException.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000)
+    )
     public ProductDTO getProductById(Long productId) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-api-key", apiKey);
@@ -36,5 +45,11 @@ public class ProductClient {
         );
 
         return response.getBody().getData();
+    }
+
+    @Recover
+    public ProductDTO recover(RestClientException e, Long productId) {
+        System.err.println("Fallarn todos los intentos para obtener el producto con ID: " + productId);
+        return null;
     }
 }

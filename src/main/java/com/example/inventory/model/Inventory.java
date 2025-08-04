@@ -24,6 +24,13 @@ public class Inventory {
     @Column(nullable = false)
     private Integer quantity;
 
+    public Inventory() {}
+
+    public Inventory(Long productId, int quantity) {
+        this.productId = productId;
+        this.quantity = quantity;
+    }
+
     // Getters y setters
     public Long getId() {
         return id;
