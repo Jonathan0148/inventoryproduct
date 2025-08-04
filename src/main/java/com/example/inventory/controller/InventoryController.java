@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +50,7 @@ public class InventoryController {
     @Operation(
             summary = "Actualizar cantidad de inventario de un producto",
             description = "Permite actualizar directamente la cantidad en inventario para un producto existente.",
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Objeto con la nueva cantidad de inventario",
                     required = true,
                     content = @Content(schema = @Schema(implementation = Inventory.class))
@@ -76,7 +75,7 @@ public class InventoryController {
     @Operation(
             summary = "Realizar una compra de producto",
             description = "Verifica la disponibilidad en inventario, descuenta la cantidad comprada y devuelve información de la compra.",
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Solicitud de compra con ID de producto y cantidad",
                     required = true,
                     content = @Content(schema = @Schema(implementation = PurchaseRequest.class))

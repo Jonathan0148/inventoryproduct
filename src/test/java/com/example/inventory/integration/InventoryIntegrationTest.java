@@ -49,6 +49,7 @@ public class InventoryIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        // Clean and prepare
         inventoryRepository.deleteAll();
 
         product = new ProductDTO();
@@ -57,7 +58,7 @@ public class InventoryIntegrationTest {
         product.setDescription("Descripción Mock");
         product.setPrice(BigDecimal.valueOf(50.0));
 
-        // Mock para producto existente y no existente
+        // Mock for existing and non-existing products
         when(productClient.getProductById(1L)).thenReturn(product);
         when(productClient.getProductById(999L))
                 .thenThrow(new com.example.inventory.exception.ResourceNotFoundException(
@@ -76,13 +77,12 @@ public class InventoryIntegrationTest {
 
     @Test
     void PUT_updateQuantity_createsOrUpdatesInventory() throws Exception {
-        Inventory req = new Inventory();
-        req.setQuantity(20);
+        String json = "{\"quantity\":20}";
 
         mockMvc.perform(put("/api/inventory/1")
                         .header(API_KEY_HEADER, INVENTORY_API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                        .content(json))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.quantity").value(20));
 
@@ -94,14 +94,12 @@ public class InventoryIntegrationTest {
     void POST_purchase_success_andUpdatesStock() throws Exception {
         inventoryRepository.save(new Inventory(1L, 15));
 
-        var purchaseReq = new com.example.inventory.dto.PurchaseRequest();
-        purchaseReq.setProductId(1L);
-        purchaseReq.setQuantity(5);
+        String body = "{\"productId\":1,\"quantity\":5}";
 
         mockMvc.perform(post("/api/inventory/purchase")
                         .header(API_KEY_HEADER, INVENTORY_API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(purchaseReq)))
+                        .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.remainingStock").value(10));
 
@@ -113,14 +111,12 @@ public class InventoryIntegrationTest {
     void POST_purchase_insufficientStock_returnsBadRequest() throws Exception {
         inventoryRepository.save(new Inventory(1L, 2));
 
-        var purchaseReq = new com.example.inventory.dto.PurchaseRequest();
-        purchaseReq.setProductId(1L);
-        purchaseReq.setQuantity(5);
+        String body = "{\"productId\":1,\"quantity\":5}";
 
         mockMvc.perform(post("/api/inventory/purchase")
                         .header(API_KEY_HEADER, INVENTORY_API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(purchaseReq)))
+                        .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Inventario insuficiente para el producto ID: 1"));
     }
@@ -135,13 +131,12 @@ public class InventoryIntegrationTest {
 
     @Test
     void PUT_updateQuantity_productNotFound_returnsNotFound() throws Exception {
-        var req = new Inventory();
-        req.setQuantity(5);
+        String json = "{\"quantity\":5}";
 
         mockMvc.perform(put("/api/inventory/999")
                         .header(API_KEY_HEADER, INVENTORY_API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                        .content(json))
                 .andExpect(status().isNotFound());
     }
 }
