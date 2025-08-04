@@ -4,6 +4,7 @@ import com.example.inventory.dto.ApiResponse;
 import com.example.inventory.dto.ProductWithInventoryDTO;
 import com.example.inventory.dto.PurchaseRequest;
 import com.example.inventory.dto.PurchaseResponse;
+import com.example.inventory.exception.InsufficientStockException;
 import com.example.inventory.model.Inventory;
 import com.example.inventory.service.InventoryService;
 import com.example.inventory.util.SuccessResponseUtils;
@@ -14,8 +15,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/inventory")
@@ -38,7 +49,7 @@ public class InventoryController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Producto no encontrado")
             }
     )
-    @GetMapping("/{productId}")
+    @GetMapping(path = "/{productId}")
     public ResponseEntity<ApiResponse<ProductWithInventoryDTO>> getInventoryByProductId(
             @Parameter(description = "ID del producto a consultar", example = "1")
             @PathVariable Long productId
@@ -62,7 +73,7 @@ public class InventoryController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Producto o inventario no encontrado")
             }
     )
-    @PutMapping("/{productId}")
+    @PutMapping(path = "/{productId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<Inventory>> updateQuantity(
             @Parameter(description = "ID del producto a actualizar", example = "1")
             @PathVariable Long productId,
@@ -87,11 +98,17 @@ public class InventoryController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Producto o inventario no encontrado")
             }
     )
-    @PostMapping("/purchase")
+    @PostMapping(path = "/purchase", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<PurchaseResponse>> processPurchase(
             @Valid @RequestBody PurchaseRequest request
     ) {
         PurchaseResponse response = inventoryService.processPurchase(request);
         return SuccessResponseUtils.buildOk(response, "Compra procesada correctamente");
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ApiResponse<Object>> handleInsufficient(InsufficientStockException ex) {
+        return SuccessResponseUtils.buildBadRequest(null, ex.getMessage());
     }
 }

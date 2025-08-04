@@ -37,4 +37,14 @@ public class SuccessResponseUtils {
         ApiResponse<PaginatedResponse<T>> response = new ApiResponse<>(message, paginated, HttpStatus.OK.value());
         return ResponseEntity.ok(response);
     }
+
+    public static <T> ResponseEntity<ApiResponse<T>> buildBadRequest(T data, String message) {
+        ApiResponse<T> resp = new ApiResponse<>();
+        resp.setStatus(HttpStatus.BAD_REQUEST.value());
+        resp.setMessage(message);
+        resp.setData(data);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(resp);
+    }
 }
